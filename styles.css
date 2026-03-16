@@ -253,6 +253,12 @@ body.menu-open .site-header {
   animation: nav-dock-in 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* subtle lift when hovering the docked nav (desktop) */
+body:not(.is-scrolled):not(.menu-open) .nav-shell:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 26px 60px rgba(6, 10, 17, 0.28);
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -424,17 +430,42 @@ body.menu-open .site-header .nav-link.active {
 .nav-toggle {
   position: relative;
   display: none;
-  width: 48px;
-  height: 48px;
-  border: 1px solid rgba(74, 74, 74, 0.1);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.82);
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   cursor: pointer;
+  /* glassy base that blends with the header */
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(6, 10, 17, 0.36);
   transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease, border-color 220ms ease;
 }
 
+/* decorative halo that fades in on hover */
+.nav-toggle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120%;
+  height: 120%;
+  transform: translate(-50%, -50%);
+  border-radius: 20px;
+  pointer-events: none;
+  background: radial-gradient(circle at 30% 30%, rgba(0,123,255,0.12), transparent 22%), radial-gradient(circle at 70% 70%, rgba(50,205,50,0.06), transparent 28%);
+  opacity: 0;
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+.nav-toggle:hover::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.02);
+}
+
+/* keep using existing HTML: span + ::before + ::after as bars */
 .nav-toggle span,
 .nav-toggle::before,
 .nav-toggle::after {
@@ -442,23 +473,23 @@ body.menu-open .site-header .nav-link.active {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 18px;
-  height: 2.5px;
-  background: #1d2834;
+  width: 22px;
+  height: 3.25px;
   border-radius: 999px;
-  transition: transform 180ms ease, opacity 180ms ease;
+  background: #ffffff;
+  transform-origin: center;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 140ms ease, background 160ms ease;
 }
 
-.nav-toggle span {
-  transform: translate(-50%, -50%);
-}
+.nav-toggle span { transform: translate(-50%, -50%); }
+.nav-toggle::before { transform: translate(-50%, calc(-50% - 8px)); }
+.nav-toggle::after  { transform: translate(-50%, calc(-50% + 8px)); }
 
-.nav-toggle::before {
-  transform: translate(-50%, calc(-50% - 6px));
-}
-
-.nav-toggle::after {
-  transform: translate(-50%, calc(-50% + 6px));
+/* menu open morph: hide middle bar, rotate others into an X */
+body.menu-open .nav-toggle {
+  transform: scale(0.98);
+  box-shadow: 0 10px 30px rgba(6, 10, 17, 0.22);
 }
 
 body.menu-open .nav-toggle span {
@@ -473,10 +504,47 @@ body.menu-open .nav-toggle::after {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
+/* default header (dark translucent) - make bars white for contrast */
 body:not(.is-scrolled):not(.menu-open) .nav-toggle {
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(9, 18, 28, 0.28);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+}
+
+body:not(.is-scrolled):not(.menu-open) .nav-toggle span,
+body:not(.is-scrolled):not(.menu-open) .nav-toggle::before,
+body:not(.is-scrolled):not(.menu-open) .nav-toggle::after {
+  background: #ffffff;
+}
+
+/* scrolled / light header - switch to dark bars for contrast */
+body.is-scrolled .nav-toggle,
+body.menu-open .nav-toggle {
+  border-color: rgba(74, 74, 74, 0.06);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+body.is-scrolled .nav-toggle span,
+body.is-scrolled .nav-toggle::before,
+body.is-scrolled .nav-toggle::after,
+body.menu-open .nav-toggle span,
+body.menu-open .nav-toggle::before,
+body.menu-open .nav-toggle::after {
+  background: #1a2330;
+}
+
+/* theme-dark: keep the toggle subtle but readable */
+body.theme-dark .nav-toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.46);
+}
+
+body.theme-dark .nav-toggle span,
+body.theme-dark .nav-toggle::before,
+body.theme-dark .nav-toggle::after {
+  background: #f3f7fb;
 }
 
 .nav-overlay {
@@ -1395,8 +1463,9 @@ body.theme-dark .theme-toggle-icon {
 }
 
 body.theme-dark .nav-toggle {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.46);
 }
 
 body.theme-dark .nav-toggle span,
@@ -1507,6 +1576,42 @@ body.theme-dark .site-footer {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0) scale(1);
+  }
+
+  .site-nav .nav-link {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.995);
+    transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* stagger delays for up to 6 links (safely covers nav size) */
+  .site-nav .nav-link:nth-child(1) { transition-delay: 60ms; }
+  .site-nav .nav-link:nth-child(2) { transition-delay: 120ms; }
+  .site-nav .nav-link:nth-child(3) { transition-delay: 180ms; }
+  .site-nav .nav-link:nth-child(4) { transition-delay: 240ms; }
+  .site-nav .nav-link:nth-child(5) { transition-delay: 300ms; }
+  .site-nav .nav-link:nth-child(6) { transition-delay: 360ms; }
+
+  /* when menu opens make links visible and reset delays so they animate in */
+  body.menu-open .site-nav .nav-link {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* ensure the overall nav panel animates first, then links follow */
+  body.menu-open .site-nav {
+    transition-delay: 0s;
+  }
+
+  /* if reduced motion is preferred, disable the mobile link animations */
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav .nav-link,
+    body.menu-open .site-nav .nav-link {
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
   }
 
   .nav-link {
